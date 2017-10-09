@@ -1,9 +1,8 @@
 import java.util.*;
 
 /*
-Sample input:
+Sample input 1:
 
-works:
 6 0 8 0 0 0 9 0 4
 2 0 0 0 1 4 0 5 0
 0 0 7 9 8 3 0 0 0
@@ -14,8 +13,19 @@ works:
 0 5 0 7 4 0 0 0 8
 9 0 4 0 0 0 3 0 6
 
+Expected Result:
+6 1 8 2 7 5 9 3 4
+2 9 3 6 1 4 8 5 7
+5 4 7 9 8 3 2 6 1
+4 2 1 5 3 7 6 8 9
+7 3 9 4 6 8 5 1 2
+8 6 5 1 2 9 4 7 3
+1 8 6 3 9 2 7 4 5
+3 5 2 7 4 6 1 9 8
+9 7 4 8 5 1 3 2 6
 
-not works:
+Sample input 2:
+not works yet
 8 0 0 9 3 0 0 0 2
 0 0 9 0 0 0 0 4 0
 7 0 2 1 0 0 9 6 0
@@ -26,7 +36,6 @@ not works:
 0 3 0 0 0 0 5 0 0
 5 0 0 0 6 2 0 0 8
 
-extra line
 
 */
 public class SodokuSolver2 {
@@ -74,55 +83,53 @@ public class SodokuSolver2 {
 
     }
 
-    static void RowCheck(int[][][] Array3D) {
+    static void RowAndColumnCheck(int[][][] Array3D) {
         for (int i = 0; i < 9; i++) {
             for (int j = 0; j < 9; j++) {
+                //check in rows excludes possibilities
                 if (Array3D[i][j][0] == 0) {
                     for (int k = 1; k < 10; k++) {
                         for (int r = 0; r < 9; r++) {
                             if (Array3D[i][j][k] == Array3D[i][r][0]) {
-                                Array3D[i][j][k] = 0;
+                                Array3D[i][j][k] = 0; //set the possibilities to 0 after exclude a number
+                                break; // break after exclude a number, no need to continue
                             }
+
                         }
 
                     }
-
                 }
-            }
-        }
-
-    }
-
-    static void ColumnCheck(int[][][] Array3D) {
-        for (int i = 0; i < 9; i++) {
-            for (int j = 0; j < 9; j++) {
+                //check in columns excludes possibilities
                 if (Array3D[j][i][0] == 0) {
                     for (int k = 1; k < 10; k++) {
                         for (int r = 0; r < 9; r++) {
                             if (Array3D[j][i][k] == Array3D[r][i][0]) {
-                                Array3D[j][i][k] = 0;
+                                Array3D[j][i][k] = 0; //set the possibilities to 0 after exclude a number
+                                break; // break after exclude a number, no need to continue
                             }
                         }
 
                     }
 
                 }
+
             }
         }
-
     }
 
-    static void BoxCheck(int[][][] Array3D) {
-        //top left box
 
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
+// Search in the box specified in the parameter, excludes possibilities
+
+    static void BoxCheckPar(int rowStart, int columnStart, int[][][] Array3D) {
+        for (int i = rowStart; i < rowStart + 3; i++) {
+            for (int j = columnStart; j < columnStart + 3; j++) {
                 if (Array3D[i][j][0] == 0) {
                     for (int k = 1; k < 10; k++) {
-                        for (int r = 0; r < 3; r++) {
-                            for (int o = 0; o < 3; o++) {
+                        for (int r = rowStart; r < rowStart + 3; r++) {
+                            for (int o = columnStart; o < columnStart + 3; o++) {
                                 if (Array3D[i][j][k] == Array3D[r][o][0]) {
-                                    Array3D[i][j][k] = 0;
+                                    Array3D[i][j][k] = 0; //set the possibilities to 0 after exclude a number
+                                    break; // break after exclude a number, no need to continue
                                 }
                             }
 
@@ -131,151 +138,16 @@ public class SodokuSolver2 {
                 }
             }
         }
+    }
 
-        //top middle box
+//Run BoxCheck() method for all 9 boxes
 
-        for (int i = 0; i < 3; i++) {
-            for (int j = 3; j < 6; j++) {
-                if (Array3D[i][j][0] == 0) {
-                    for (int k = 1; k < 10; k++) {
-                        for (int r = 0; r < 3; r++) {
-                            for (int o = 3; o < 6; o++) {
-                                if (Array3D[i][j][k] == Array3D[r][o][0]) {
-                                    Array3D[i][j][k] = 0;
-                                }
-                            }
-
-                        }
-                    }
-                }
+    static void BoxCheckAll(int[][][] Array3D) {
+        for (int i = 0; i <= 6; i += 3) {
+            for (int j = 0; j <= 6; j += 3) {
+                BoxCheckPar(i, j, Array3D);
             }
         }
-
-        //top right box
-        for (int i = 0; i < 3; i++) {
-            for (int j = 6; j < 9; j++) {
-                if (Array3D[i][j][0] == 0) {
-                    for (int k = 1; k < 10; k++) {
-                        for (int r = 0; r < 3; r++) {
-                            for (int o = 6; o < 9; o++) {
-                                if (Array3D[i][j][k] == Array3D[r][o][0]) {
-                                    Array3D[i][j][k] = 0;
-                                }
-                            }
-
-                        }
-                    }
-                }
-            }
-        }
-        //middle left box
-        for (int i = 3; i < 6; i++) {
-            for (int j = 0; j < 3; j++) {
-                if (Array3D[i][j][0] == 0) {
-                    for (int k = 1; k < 10; k++) {
-                        for (int r = 3; r < 6; r++) {
-                            for (int o = 0; o < 3; o++) {
-                                if (Array3D[i][j][k] == Array3D[r][o][0]) {
-                                    Array3D[i][j][k] = 0;
-                                }
-                            }
-
-                        }
-                    }
-                }
-            }
-        }
-
-        // middle middle box
-        for (int i = 3; i < 6; i++) {
-            for (int j = 3; j < 6; j++) {
-                if (Array3D[i][j][0] == 0) {
-                    for (int k = 1; k < 10; k++) {
-                        for (int r = 3; r < 6; r++) {
-                            for (int o = 3; o < 6; o++) {
-                                if (Array3D[i][j][k] == Array3D[r][o][0]) {
-                                    Array3D[i][j][k] = 0;
-                                }
-                            }
-
-                        }
-                    }
-                }
-            }
-        }
-        //middle left box
-        for (int i = 3; i < 6; i++) {
-            for (int j = 6; j < 9; j++) {
-                if (Array3D[i][j][0] == 0) {
-                    for (int k = 1; k < 10; k++) {
-                        for (int r = 3; r < 6; r++) {
-                            for (int o = 6; o < 9; o++) {
-                                if (Array3D[i][j][k] == Array3D[r][o][0]) {
-                                    Array3D[i][j][k] = 0;
-                                }
-                            }
-
-                        }
-                    }
-                }
-            }
-        }
-
-        //bottom lef box
-        for (int i = 6; i < 9; i++) {
-            for (int j = 0; j < 3; j++) {
-                if (Array3D[i][j][0] == 0) {
-                    for (int k = 1; k < 10; k++) {
-                        for (int r = 6; r < 9; r++) {
-                            for (int o = 0; o < 3; o++) {
-                                if (Array3D[i][j][k] == Array3D[r][o][0]) {
-                                    Array3D[i][j][k] = 0;
-                                }
-                            }
-
-                        }
-                    }
-                }
-            }
-        }
-
-        //bottom middle box
-        for (int i = 6; i < 9; i++) {
-            for (int j = 3; j < 6; j++) {
-                if (Array3D[i][j][0] == 0) {
-                    for (int k = 1; k < 10; k++) {
-                        for (int r = 6; r < 9; r++) {
-                            for (int o = 3; o < 6; o++) {
-                                if (Array3D[i][j][k] == Array3D[r][o][0]) {
-                                    Array3D[i][j][k] = 0;
-                                }
-                            }
-
-                        }
-                    }
-                }
-            }
-        }
-
-        //bottom left box
-        for (int i = 6; i < 9; i++) {
-            for (int j = 6; j < 9; j++) {
-                if (Array3D[i][j][0] == 0) {
-                    for (int k = 1; k < 10; k++) {
-                        for (int r = 6; r < 9; r++) {
-                            for (int o = 6; o < 9; o++) {
-                                if (Array3D[i][j][k] == Array3D[r][o][0]) {
-                                    Array3D[i][j][k] = 0;
-                                }
-                            }
-
-                        }
-                    }
-                }
-            }
-        }
-
-
     }
 
 
@@ -327,22 +199,23 @@ public class SodokuSolver2 {
     }
 
 
-
-
     public static void main(String[] args) {
 
         int[][][] SodokuArray = new int[9][9][10];
         System.out.println("Please enter a Sodoku to solve:");
         FillArray(SodokuArray);
 
-        while(SumOf3DArray(SodokuArray) != 405) {
-            BoxCheck(SodokuArray);
-            RowCheck(SodokuArray);
-            ColumnCheck(SodokuArray);
+        while (SumOf3DArray(SodokuArray) != 405) {
+            BoxCheckAll(SodokuArray);
+            RowAndColumnCheck(SodokuArray);
             IfOneOptionFillUp(SodokuArray);
         }
 
-//            System.out.println(SumOf3DArray(SodokuArray));
+//        Print3DArray(SodokuArray);
+//        RowAndColumnCheck(SodokuArray);
+//        System.out.println();
+//        Print3DArray(SodokuArray);
+
 
 //        Print3DArray(SodokuArray);
         System.out.println();
